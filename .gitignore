@@ -1,0 +1,4 @@
+node_modules/
+public/output/
+public/uploads/
+db/database.sqlite

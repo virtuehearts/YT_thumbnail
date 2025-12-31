@@ -1,0 +1,16 @@
+{
+  "name": "yt-thumbnail",
+  "version": "1.0.0",
+  "description": "YouTube thumbnail generator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "knex": "^3.1.0",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.7"
+  }
+}
