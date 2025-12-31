@@ -160,6 +160,131 @@ Result:
 PosixPath('/mnt/data/couch_potato_thumbnail_youtube_style.png')
 ```
 
+## Local rendering pipeline (deterministic)
+
+The repo now includes a fully-local thumbnail renderer using Pillow. It accepts a base image, a JSON template, and a JSON vars payload, then outputs a 1280×720 thumbnail.
+
+### Assets layout
+
+```
+assets/
+  fonts/        # local TTF fonts (no external downloads at render time)
+  overlays/     # transparent PNGs used in templates
+  templates/    # template JSON + vars JSON + sample base image
+```
+
+### Template JSON schema (overview)
+
+Each `assets/templates/*.json` defines a canvas, a cover crop strategy, and a list of layers. Layers can be panels, text blocks, overlays, and center dividers.
+
+```json
+{
+  "canvas": { "width": 1280, "height": 720 },
+  "crop": { "strategy": "cover", "anchor": "center" },
+  "layers": [
+    {
+      "type": "panel",
+      "name": "title_banner",
+      "anchor": "top_left",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 1280, "height": 120 },
+      "fill": { "color": "#000000", "opacity": 0.65 },
+      "shadow": { "blur": 8, "offset": { "x": 6, "y": 6 }, "color": "#000000", "opacity": 0.5 }
+    },
+    {
+      "type": "text",
+      "name": "title",
+      "anchor": "top_center",
+      "position": { "x": 640, "y": 16 },
+      "padding": { "x": 0, "y": 0 },
+      "font": { "path": "assets/fonts/DejaVuSans-Bold.ttf", "size": 72 },
+      "fill": "#FFFFFF",
+      "stroke": { "color": "#000000", "width": 8 },
+      "shadow": { "blur": 4, "offset": { "x": 3, "y": 3 }, "color": "#000000", "opacity": 0.5 },
+      "line_spacing": 6,
+      "align": "center",
+      "text": "{{title}}"
+    },
+    {
+      "type": "overlay",
+      "name": "logo",
+      "path": "assets/overlays/logo_blue.png",
+      "anchor": "top_left",
+      "position": { "x": 40, "y": 40 },
+      "size": { "width": 180, "height": 180 },
+      "opacity": 1.0
+    },
+    {
+      "type": "divider",
+      "name": "center_divider",
+      "position": 640,
+      "width": 10,
+      "color": "#FFFFFF",
+      "opacity": 0.45,
+      "blur": 4
+    }
+  ]
+}
+```
+
+Text values are resolved from a vars JSON file using `{{key}}` placeholders.
+
+### Vars JSON payload (example)
+
+```json
+{
+  "title": "SAME MONEY. SAME JUNK.",
+  "left_caption_big": "$60/month for channels\\nyou don’t watch."
+}
+```
+
+### Renderer CLI (offline)
+
+Install dependencies:
+
+```bash
+pip install pillow
+```
+
+Prepare local assets (sample base image + overlays). This stays fully offline and deterministic:
+
+```bash
+python python/make_sample_assets.py
+```
+
+Provide local fonts by dropping `.ttf` files into `assets/fonts/` and updating template font paths if needed.
+
+```bash
+python -m python.render_thumbnail \\
+  --in assets/templates/sample_base.jpg \\
+  --template assets/templates/split_screen_classic.json \\
+  --vars assets/templates/vars_split_screen_classic.json \\
+  --out out/split_screen_classic.png
+```
+
+### Example templates
+
+- `assets/templates/split_screen_classic.json` (THEN/NOW split layout)
+- `assets/templates/vram_tax.json` (logo + arrow + bold headline)
+
+### Test script
+
+```bash
+python python/render_sample.py
+```
+
+Outputs:
+
+- `out/split_screen_classic.png`
+- `out/vram_tax.png`
+
+### Screenshot placeholders
+
+Use these paths in documentation or PRs when you capture real outputs:
+
+- `out/split_screen_classic.png`
+- `out/vram_tax.png`
+
 ## Next steps
 
 - Add a UI for uploading JPEGs and configuring layout.

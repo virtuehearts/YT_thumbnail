@@ -1,0 +1,1 @@
+"""YT thumbnail rendering package."""
