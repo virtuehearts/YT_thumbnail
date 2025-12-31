@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Thumbnail Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-white min-h-screen">
+    <div class="max-w-6xl mx-auto px-6 py-10">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold">YouTube Thumbnail Generator</h1>
+        <p class="text-slate-300 mt-2">Choose a template, tweak the text, and generate a thumbnail preview.</p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <form id="thumbnail-form" class="space-y-5" enctype="multipart/form-data">
+            <div>
+              <label class="block text-sm font-semibold mb-2" for="template">Template</label>
+              <select
+                id="template"
+                name="template"
+                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+              >
+                <% templates.forEach((template) => { %>
+                <option value="<%= template.id %>" data-template='<%- JSON.stringify(template) %>'>
+                  <%= template.name %>
+                </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-2" for="main_title">Main title</label>
+              <input
+                id="main_title"
+                name="main_title"
+                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="left_caption">Left caption</label>
+                <textarea
+                  id="left_caption"
+                  name="left_caption"
+                  rows="3"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                  required
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="right_caption">Right caption</label>
+                <textarea
+                  id="right_caption"
+                  name="right_caption"
+                  rows="3"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="primary_color">Primary color</label>
+                <input
+                  id="primary_color"
+                  name="primary_color"
+                  type="color"
+                  class="w-full h-12 bg-slate-800 border border-slate-700 rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="font_size">Font size</label>
+                <input
+                  id="font_size"
+                  name="font_size"
+                  type="number"
+                  min="32"
+                  max="96"
+                  step="2"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-2" for="image">Upload image</label>
+              <input
+                id="image"
+                name="image"
+                type="file"
+                accept="image/*"
+                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-indigo-500 hover:bg-indigo-400 transition-colors text-white font-semibold px-4 py-3 rounded-lg"
+            >
+              Generate thumbnail
+            </button>
+          </form>
+        </section>
+
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Preview</h2>
+            <span id="status" class="text-sm text-slate-400">Awaiting generation</span>
+          </div>
+          <div class="flex-1 flex items-center justify-center bg-slate-950/50 border border-dashed border-slate-700 rounded-xl p-4">
+            <img
+              id="preview"
+              src=""
+              alt="Thumbnail preview"
+              class="max-h-[420px] w-full object-contain hidden"
+            />
+            <p id="placeholder" class="text-slate-500">Your generated thumbnail will appear here.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
