@@ -23,6 +23,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(publicDir));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -41,7 +42,84 @@ app.get("/", (_req, res) => {
 
 app.get("/edit", async (_req, res) => {
   const templates = await knex("templates").select("*").orderBy("id");
-  res.render("edit", { templates });
+  const stylePresets = await knex("style_presets").select("*").orderBy("id");
+  const jsonTemplates = await knex("json_templates").select("*").orderBy("id");
+  res.render("edit", { templates, stylePresets, jsonTemplates });
+});
+
+app.get("/api/style-presets", async (_req, res) => {
+  const stylePresets = await knex("style_presets").select("*").orderBy("id");
+  res.json(stylePresets);
+});
+
+app.post("/api/style-presets", async (req, res) => {
+  const {
+    name,
+    primary_color,
+    font_size,
+    banner_height,
+    panel_height,
+    panel_margin,
+    panel_padding,
+    panel_gap,
+    divider_width,
+    divider_opacity
+  } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "Preset name is required." });
+  }
+
+  const [id] = await knex("style_presets").insert({
+    name,
+    primary_color,
+    font_size,
+    banner_height,
+    panel_height,
+    panel_margin,
+    panel_padding,
+    panel_gap,
+    divider_width,
+    divider_opacity
+  });
+
+  const preset = await knex("style_presets").where({ id }).first();
+  return res.json(preset);
+});
+
+app.get("/api/json-templates", async (req, res) => {
+  const { contentType } = req.query;
+  let query = knex("json_templates").select("*").orderBy("id");
+  if (contentType) {
+    query = query.where({ content_type: contentType });
+  }
+  const jsonTemplates = await query;
+  res.json(jsonTemplates);
+});
+
+app.post("/api/json-templates", async (req, res) => {
+  const { id, name, content_type, template_json, vars_json } = req.body;
+
+  if (!name || !content_type || !template_json || !vars_json) {
+    return res.status(400).json({ error: "Name, content type, template JSON, and vars JSON are required." });
+  }
+
+  if (id) {
+    await knex("json_templates")
+      .where({ id })
+      .update({ name, content_type, template_json, vars_json, updated_at: knex.fn.now() });
+    const updated = await knex("json_templates").where({ id }).first();
+    return res.json(updated);
+  }
+
+  const [newId] = await knex("json_templates").insert({
+    name,
+    content_type,
+    template_json,
+    vars_json
+  });
+  const created = await knex("json_templates").where({ id: newId }).first();
+  return res.json(created);
 });
 
 app.post("/generate", upload.single("image"), async (req, res) => {
@@ -55,7 +133,14 @@ app.post("/generate", upload.single("image"), async (req, res) => {
       left_caption,
       right_caption,
       primary_color,
-      font_size
+      font_size,
+      banner_height,
+      panel_height,
+      panel_margin,
+      panel_padding,
+      panel_gap,
+      divider_width,
+      divider_opacity
     } = req.body;
 
     const outputFile = `${crypto.randomUUID()}.jpg`;
@@ -68,7 +153,14 @@ app.post("/generate", upload.single("image"), async (req, res) => {
       left_caption,
       right_caption,
       primary_color,
-      font_size: Number(font_size)
+      font_size: Number(font_size),
+      banner_height: Number(banner_height),
+      panel_height: Number(panel_height),
+      panel_margin: Number(panel_margin),
+      panel_padding: Number(panel_padding),
+      panel_gap: Number(panel_gap),
+      divider_width: Number(divider_width),
+      divider_opacity: Number(divider_opacity)
     };
 
     const pythonProcess = spawn("python3", [

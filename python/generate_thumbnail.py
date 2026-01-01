@@ -76,6 +76,13 @@ def main():
     primary_color = parse_hex_color(payload.get("primary_color"), alpha=210)
 
     base_font_size = payload.get("font_size") or 64
+    banner_height = payload.get("banner_height") or int(base_font_size * 1.2) + 24
+    panel_height = payload.get("panel_height") or int(TARGET_H * 0.28)
+    panel_margin = payload.get("panel_margin") or 30
+    panel_padding = payload.get("panel_padding") or 18
+    panel_gap = payload.get("panel_gap") or 20
+    divider_width = payload.get("divider_width") or 8
+    divider_opacity = payload.get("divider_opacity") or 120
     title_font = load_font(int(base_font_size), bold=True)
     sub_font = load_font(int(base_font_size * 0.6), bold=True)
 
@@ -83,20 +90,20 @@ def main():
     base = scale_crop(img).convert("RGBA")
 
     draw = ImageDraw.Draw(base)
-    banner_height = int(base_font_size * 1.2)
-    banner = Image.new("RGBA", (TARGET_W, banner_height + 24), primary_color)
+    banner = Image.new("RGBA", (TARGET_W, int(banner_height)), primary_color)
     base.alpha_composite(banner, (0, 0))
 
     title_text = wrap_text(draw, main_title, title_font, TARGET_W - 80)
     tw, th = draw.textbbox((0, 0), title_text, font=title_font)[2:]
     title_x = (TARGET_W - tw) // 2
-    draw_outlined_text(draw, (title_x, 12), title_text, title_font, stroke=8, align="center")
+    title_y = max(12, int((banner_height - th) / 2))
+    draw_outlined_text(draw, (title_x, title_y), title_text, title_font, stroke=8, align="center")
 
-    panel_h = int(TARGET_H * 0.28)
-    panel_w = TARGET_W // 2 - 50
-    panel_y = TARGET_H - panel_h - 40
-    left_x = 30
-    right_x = TARGET_W // 2 + 20
+    panel_h = int(panel_height)
+    panel_w = int((TARGET_W - (2 * panel_margin) - panel_gap) / 2)
+    panel_y = TARGET_H - panel_h - panel_margin
+    left_x = panel_margin
+    right_x = left_x + panel_w + panel_gap
 
     def add_panel(x, y, w, h):
         panel = Image.new("RGBA", (w, h), (0, 0, 0, 155))
@@ -107,15 +114,15 @@ def main():
     add_panel(left_x, panel_y, panel_w, panel_h)
     add_panel(right_x, panel_y, panel_w, panel_h)
 
-    left_text = wrap_text(draw, left_caption, sub_font, panel_w - 40)
-    right_text = wrap_text(draw, right_caption, sub_font, panel_w - 40)
+    left_text = wrap_text(draw, left_caption, sub_font, panel_w - (panel_padding * 2))
+    right_text = wrap_text(draw, right_caption, sub_font, panel_w - (panel_padding * 2))
 
-    draw_outlined_text(draw, (left_x + 18, panel_y + 18), left_text, sub_font, stroke=7)
-    draw_outlined_text(draw, (right_x + 18, panel_y + 18), right_text, sub_font, stroke=7)
+    draw_outlined_text(draw, (left_x + panel_padding, panel_y + panel_padding), left_text, sub_font, stroke=7)
+    draw_outlined_text(draw, (right_x + panel_padding, panel_y + panel_padding), right_text, sub_font, stroke=7)
 
-    divider = Image.new("RGBA", (8, TARGET_H), (255, 255, 255, 120))
+    divider = Image.new("RGBA", (int(divider_width), TARGET_H), (255, 255, 255, int(divider_opacity)))
     divider = divider.filter(ImageFilter.GaussianBlur(2))
-    base.alpha_composite(divider, (TARGET_W // 2 - 4, 0))
+    base.alpha_composite(divider, (TARGET_W // 2 - int(divider_width / 2), 0))
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     base.convert("RGB").save(output_path, quality=95)
