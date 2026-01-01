@@ -7,12 +7,50 @@ TARGET_W = 1280
 TARGET_H = 720
 
 
-def load_font(size, bold=True):
-    candidates = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-    ]
-    for path in candidates:
+FONT_CATALOG = {
+    "dejavu_sans": {
+        "regular": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "bold": "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "italic": "/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf",
+        "bold_italic": "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf",
+    },
+    "dejavu_serif": {
+        "regular": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+        "bold": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+        "italic": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf",
+        "bold_italic": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf",
+    },
+    "liberation_sans": {
+        "regular": "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "bold": "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "italic": "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf",
+        "bold_italic": "/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf",
+    },
+    "liberation_serif": {
+        "regular": "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf",
+        "bold": "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf",
+        "italic": "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",
+        "bold_italic": "/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf",
+    },
+}
+
+
+def load_font(size, family="dejavu_sans", style="bold"):
+    family = (family or "dejavu_sans").lower()
+    style = (style or "bold").lower()
+    candidates = []
+    family_entry = FONT_CATALOG.get(family)
+    if family_entry:
+        candidates.append(family_entry.get(style))
+        candidates.append(family_entry.get("bold"))
+        candidates.append(family_entry.get("regular"))
+    candidates.extend(
+        [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ]
+    )
+    for path in filter(None, candidates):
         try:
             return ImageFont.truetype(path, size=size)
         except Exception:
@@ -76,6 +114,8 @@ def main():
     primary_color = parse_hex_color(payload.get("primary_color"), alpha=210)
 
     base_font_size = payload.get("font_size") or 64
+    font_family = payload.get("font_family") or "dejavu_sans"
+    font_style = payload.get("font_style") or "bold"
     banner_height = payload.get("banner_height") or int(base_font_size * 1.2) + 24
     panel_height = payload.get("panel_height") or int(TARGET_H * 0.28)
     panel_margin = payload.get("panel_margin") or 30
@@ -83,8 +123,8 @@ def main():
     panel_gap = payload.get("panel_gap") or 20
     divider_width = payload.get("divider_width") or 8
     divider_opacity = payload.get("divider_opacity") or 120
-    title_font = load_font(int(base_font_size), bold=True)
-    sub_font = load_font(int(base_font_size * 0.6), bold=True)
+    title_font = load_font(int(base_font_size), family=font_family, style=font_style)
+    sub_font = load_font(int(base_font_size * 0.6), family=font_family, style=font_style)
 
     img = Image.open(image_path).convert("RGBA")
     base = scale_crop(img).convert("RGBA")
