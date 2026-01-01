@@ -25,6 +25,8 @@ const fields = {
   right_caption: document.getElementById("right_caption"),
   primary_color: document.getElementById("primary_color"),
   font_size: document.getElementById("font_size"),
+  font_family: document.getElementById("font_family"),
+  font_style: document.getElementById("font_style"),
   banner_height: document.getElementById("banner_height"),
   panel_height: document.getElementById("panel_height"),
   panel_margin: document.getElementById("panel_margin"),

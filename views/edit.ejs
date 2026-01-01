@@ -121,6 +121,36 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="font_family">Font family</label>
+                <select
+                  id="font_family"
+                  name="font_family"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                >
+                  <option value="dejavu_sans" selected>DejaVu Sans (system)</option>
+                  <option value="dejavu_serif">DejaVu Serif (system)</option>
+                  <option value="liberation_sans">Liberation Sans (system)</option>
+                  <option value="liberation_serif">Liberation Serif (system)</option>
+                </select>
+                <p class="text-xs text-slate-400 mt-2">Uses locally available system fonts.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-2" for="font_style">Font style</label>
+                <select
+                  id="font_style"
+                  name="font_style"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                >
+                  <option value="regular">Regular</option>
+                  <option value="bold" selected>Bold</option>
+                  <option value="italic">Italic</option>
+                  <option value="bold_italic">Bold italic</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label class="block text-sm font-semibold mb-2" for="image">Upload image</label>
               <input
